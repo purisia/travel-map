@@ -422,8 +422,14 @@ function renderSubway() {
   });
 }
 
-// ═══ SERVICE WORKER 등록 ═══
+// ═══ SERVICE WORKER 등록 + 자동 업데이트 ═══
 if ('serviceWorker' in navigator) {
+  // SW가 업데이트되면 자동 새로고침
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      window.location.reload();
+    });
+  }
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('./sw.js').catch(function () {});
   });
