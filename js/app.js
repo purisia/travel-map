@@ -311,15 +311,14 @@ function submitForm(e) {
   if (id) {
     var i = locs.findIndex(function (l) { return l.id === id; });
     if (i >= 0) locs[i] = d;
-    toast('수정 완료!', 'success');
   } else {
     locs.push(d);
-    toast('등록 완료!', 'success');
   }
   save(locs);
   render();
   closeFormModal();
   map.setView([d.lat, d.lng], 16);
+  toast(id ? '수정 완료!' : '등록 완료!', 'success');
 }
 
 function extractCoords() {
@@ -443,19 +442,23 @@ if (fk.length) map.fitBounds(L.latLngBounds(fk.map(function (l) { return [l.lat,
 
 // ═══ FIREBASE REAL-TIME SYNC ═══
 if (window.firebaseSync) {
-  // Connection indicator
+  // Connection indicator (UI only, no data push)
   firebaseSync.onConnection(function (connected) {
     var el = document.getElementById('syncStatus');
     if (el) {
       el.classList.toggle('connected', connected);
       el.title = connected ? '클라우드 연동됨' : '오프라인';
     }
-    if (connected) firebaseSync.push(locs);
   });
 
-  // Initialize: push local data if Firebase is empty
+  // Initialize: Firebase is source of truth
   firebaseSync.read().then(function (fbData) {
-    if (!fbData || fbData.length === 0) {
+    if (fbData && fbData.length > 0) {
+      locs = fbData;
+      localStorage.setItem(SK, JSON.stringify(locs));
+      render();
+    } else {
+      // Firebase empty (first time) - push local data
       firebaseSync.push(locs);
     }
   });
