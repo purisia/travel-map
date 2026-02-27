@@ -10,6 +10,7 @@
 | 호스팅 | [GitHub Pages](https://pages.github.com/) | 정적 사이트 배포 |
 | PWA | Service Worker + manifest.json | 오프라인 지원, 홈 화면 추가 |
 | 좌표변환 | [Google Apps Script](https://script.google.com/) | 단축 URL → 좌표/이름/지역 자동 추출 |
+| 장소정보 | [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service) | 일본어명/카테고리/사진 자동 입력 |
 | 폰트 | Noto Sans KR (Google Fonts) | 한국어 UI |
 
 ## 프로젝트 구조
@@ -33,7 +34,7 @@ travel-map/
 
 - 장소 마커 표시 (카테고리별 색상, 필수 장소 강조 애니메이션)
 - 카테고리 필터 (맛집/카페/관광/쇼핑/온천/숙소)
-- 장소 추가/수정/삭제 (Google Maps 링크에서 좌표 자동 추출, 단축 URL도 지원)
+- 장소 추가/수정/삭제 (Google Maps 링크에서 좌표/일본어명/카테고리/사진 자동 입력, 단축 URL도 지원)
 - 리스트 뷰 (카테고리순/거리순/이름순 정렬, 검색)
 - GPS 실시간 추적
 - 지하철 노선도 (공항선/하코자키선/나나쿠마선, OSM 실제 경로)
@@ -157,6 +158,43 @@ var GEOCODE_API = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 ```
 
 > 코드 수정 시 반드시 **새 배포**를 해야 변경사항이 반영됩니다 (기존 배포 수정 불가).
+
+### 7. Google Places API 설정 (일본어명/카테고리/사진)
+
+Google Maps 링크 붙여넣기 시 좌표 기반으로 장소의 일본어 이름, 카테고리, 사진을 자동으로 가져옵니다.
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → Firebase 프로젝트 선택
+2. **APIs & Services → Library** → **Places API (New)** 검색 → **Enable**
+3. **APIs & Services → Credentials** → Firebase 웹 API 키 선택
+4. API 제한사항에서 **Places API (New)** 허용 (또는 제한 없음으로 설정)
+5. `js/app.js` 상단의 `PLACES_API_KEY` 변수에 API 키 설정:
+
+```javascript
+var PLACES_API_KEY = 'YOUR_API_KEY';
+```
+
+> Places API는 **결제 계정 연결 필수**입니다. [Google Cloud Billing](https://console.cloud.google.com/billing)에서 설정하세요.
+> 매월 $200 무료 크레딧이 제공되며, 소규모 사용 시 과금되지 않습니다.
+
+#### 동작 방식
+
+1. Google Maps URL 붙여넣기 → 좌표 추출 (일반 URL: 정규식, 단축 URL: Apps Script)
+2. 추출된 좌표로 Places API `searchNearby` 호출 (반경 30m)
+3. 응답에서 자동 입력:
+   - **일본어 이름** (`displayName`) → 이름(일본어) 필드
+   - **카테고리** (`primaryType`) → 카테고리 셀렉트 자동 선택
+   - **사진** (`photos`) → 폼에 미리보기 표시
+
+#### 타입 → 카테고리 매핑
+
+| Places API 타입 | 앱 카테고리 |
+|-----------------|-------------|
+| coffee_shop, cafe, tea_house | cafe |
+| restaurant, ramen_restaurant, sushi_restaurant 등 | food |
+| tourist_attraction, museum, park 등 | sight |
+| shopping_mall, clothing_store, book_store 등 | shop |
+| spa | onsen |
+| hotel, hostel, lodging 등 | place |
 
 ---
 
