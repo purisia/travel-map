@@ -81,7 +81,7 @@ const DEFAULT_DATA = [
   // 🛍️ 쇼핑 (shop)
   // ──────────────────────────────────
   { id: "d45", name: "캐널시티", jp: "キャナルシティ博多", cat: "shop", area: "하카타", note: "건담·지브리. 분수쇼! 면세", lat: 33.5896, lng: 130.4108, maps: "https://www.google.com/maps/search/?api=1&query=キャナルシティ博多" },
-  { id: "d46", name: "캐널시티 오파", jp: "OPA", cat: "shop", area: "나카스", note: "B1F 짱구 시네마!", lat: 33.5897, lng: 130.4086, maps: "https://www.google.com/maps/search/?api=1&query=キャナルシティOPA" },
+  { id: "d46", name: "캐널시티 오파", jp: "OPA", cat: "shop", area: "나카스", note: "B1F 짱구 시네마!", lat: 33.5897, lng: 130.4112, maps: "https://www.google.com/maps/search/?api=1&query=キャナルシティOPA" },
   { id: "d47", name: "텐진 지하상가", jp: "天神地下街", cat: "shop", area: "텐진", note: "150개+ 매장", lat: 33.5924, lng: 130.3995, maps: "https://www.google.com/maps/search/?api=1&query=天神地下街+福岡" },
   { id: "d48", name: "미나 텐진", jp: "ミーナ天神", cat: "shop", area: "텐진", note: "GU·유니클로. 면세", lat: 33.5928, lng: 130.3980, maps: "https://www.google.com/maps/search/?api=1&query=ミーナ天神" },
   { id: "d49", name: "돈키호테", jp: "ドンキ 中洲店", cat: "shop", area: "나카스", note: "24시간! 면세", lat: 33.5941, lng: 130.4068, maps: "https://www.google.com/maps/search/?api=1&query=ドンキホーテ+中洲店" },
