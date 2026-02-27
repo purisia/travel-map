@@ -434,9 +434,10 @@ function renderSubway() {
   subwayLines.clearLayers();
   Object.keys(SUBWAY_DATA).forEach(function (key) {
     var line = SUBWAY_DATA[key];
-    var coords = [];
+    // Use actual route geometry if available, otherwise fall back to station coordinates
+    var coords = line.routeGeometry ? line.routeGeometry.slice() : [];
     line.stations.forEach(function (st) {
-      coords.push([st.lat, st.lng]);
+      if (!line.routeGeometry) coords.push([st.lat, st.lng]);
       var icon = L.divIcon({
         className: '',
         iconSize: [20, 20],
