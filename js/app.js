@@ -370,6 +370,20 @@ function stopPick() {
   ph = null;
 }
 
+function forceRefresh() {
+  if ('caches' in window) {
+    caches.keys().then(function (names) {
+      names.forEach(function (name) { caches.delete(name); });
+    });
+  }
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { r.unregister(); });
+    });
+  }
+  setTimeout(function () { window.location.reload(true); }, 300);
+}
+
 function toast(m, t) {
   var e = document.createElement('div');
   e.className = 'toast toast-' + t;

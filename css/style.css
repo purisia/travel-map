@@ -37,8 +37,10 @@ body {
 .header-btns { display: flex; gap: 6px; }
 .sync-indicator {
   font-size: 16px; opacity: 0.3; transition: opacity .3s;
-  cursor: default; line-height: 1;
+  cursor: pointer; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
 }
+.sync-indicator:active { transform: scale(.85); }
 .sync-indicator.connected { opacity: 1; }
 
 /* ═══ LAYER CONTROL ═══ */
