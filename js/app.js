@@ -324,6 +324,7 @@ function submitForm(e) {
 function extractCoords() {
   var url = document.getElementById('fMaps').value;
   if (!url) return;
+  var cr = document.getElementById('coordResult');
   var lat, lng;
   var m1 = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
   if (m1) { lat = parseFloat(m1[1]); lng = parseFloat(m1[2]); }
@@ -334,10 +335,17 @@ function extractCoords() {
   if (lat && lng && lat > 30 && lat < 40 && lng > 125 && lng < 140) {
     document.getElementById('fLat').value = lat.toFixed(6);
     document.getElementById('fLng').value = lng.toFixed(6);
-    document.getElementById('coordResult').style.display = 'block';
-    document.getElementById('coordResult').textContent = '✅ 위치 자동 입력! (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+    cr.style.display = 'block';
+    cr.innerHTML = '✅ 위치 자동 입력! (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+    cr.style.background = 'rgba(46,125,50,.15)';
+    cr.style.color = '#66BB6A';
+  } else if (url.match(/maps\.app\.goo\.gl|goo\.gl\/maps/)) {
+    cr.style.display = 'block';
+    cr.innerHTML = '📎 단축 URL! <a href="' + url + '" target="_blank" style="color:#4285f4;text-decoration:underline;" onclick="event.stopPropagation()">구글맵에서 열기</a> → 전체 URL 복사 → 여기에 붙여넣기';
+    cr.style.background = 'rgba(66,133,244,.15)';
+    cr.style.color = '#90CAF9';
   } else {
-    document.getElementById('coordResult').style.display = 'none';
+    cr.style.display = 'none';
   }
 }
 
