@@ -371,44 +371,6 @@ function stopPick() {
   ph = null;
 }
 
-// ═══ EXPORT ═══
-function openExportModal() {
-  document.getElementById('exportArea').value = JSON.stringify(locs, null, 2);
-  document.getElementById('exportModal').classList.add('open');
-}
-function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
-
-function copyExport() {
-  var a = document.getElementById('exportArea');
-  a.select();
-  navigator.clipboard.writeText(a.value)
-    .then(function () { toast('복사!', 'success'); })
-    .catch(function () { document.execCommand('copy'); toast('복사!', 'success'); });
-}
-
-function promptImport() {
-  var j = prompt('백업 JSON 붙여넣기:');
-  if (!j) return;
-  try {
-    var d = JSON.parse(j);
-    if (!Array.isArray(d)) throw 0;
-    locs = d;
-    save(locs);
-    render();
-    closeExportModal();
-    toast(d.length + '곳 복원!', 'success');
-  } catch (e) { alert('JSON 형식 오류'); }
-}
-
-function resetData() {
-  if (!confirm('초기 데이터로 복원?\n추가한 데이터가 사라집니다.')) return;
-  locs = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  save(locs);
-  render();
-  closeExportModal();
-  toast('초기화!', 'success');
-}
-
 function toast(m, t) {
   var e = document.createElement('div');
   e.className = 'toast toast-' + t;

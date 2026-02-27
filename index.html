@@ -22,7 +22,7 @@
 
 <div class="header">
   <div><h1>🍜 후쿠오카 3/5~8</h1><div class="subtitle">맛집 + 관광 + 쇼핑</div></div>
-  <div class="header-btns"><span id="syncStatus" class="sync-indicator" title="오프라인">☁️</span><button class="header-btn" onclick="openExportModal()" title="백업">💾</button></div>
+  <div class="header-btns"><span id="syncStatus" class="sync-indicator" title="오프라인">☁️</span></div>
 </div>
 
 <div class="layer-control" id="layerControl">
@@ -95,19 +95,6 @@
   </div>
 </div>
 
-<!-- EXPORT MODAL -->
-<div class="modal-overlay" id="exportModal">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">💾 데이터 관리</div><button class="modal-close" onclick="closeExportModal()">✕</button></div>
-    <div class="form-group"><label class="form-label">현재 데이터 (JSON) — 복사해서 백업</label><textarea class="export-area" id="exportArea" readonly></textarea></div>
-    <div class="export-btns">
-      <button class="export-btn" style="background:var(--accent);color:#fff" onclick="copyExport()">📋 복사</button>
-      <button class="export-btn" style="background:rgba(255,255,255,.1);color:#aab" onclick="promptImport()">📥 가져오기</button>
-      <button class="export-btn" style="background:rgba(229,57,53,.15);color:#E53935" onclick="resetData()">🗑️ 초기화</button>
-    </div>
-    <div class="form-hint" style="margin-top:10px">📥 가져오기: 백업 JSON 붙여넣기 | 🗑️ 초기화: 원본 복원</div>
-  </div>
-</div>
 
 <script src="js/data.js"></script>
 <script src="js/subway.js"></script>

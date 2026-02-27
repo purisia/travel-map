@@ -35,12 +35,6 @@ body {
 }
 .header .subtitle { font-size: 11px; color: #8899aa; }
 .header-btns { display: flex; gap: 6px; }
-.header-btn {
-  padding: 5px 10px; border-radius: 8px;
-  border: 1.5px solid rgba(255,255,255,.2);
-  background: 0 0; color: #ccc; font-size: 18px; cursor: pointer;
-}
-.header-btn:active { background: rgba(255,255,255,.1); }
 .sync-indicator {
   font-size: 16px; opacity: 0.3; transition: opacity .3s;
   cursor: default; line-height: 1;
@@ -232,18 +226,6 @@ body {
 .toast-success { background: #2E7D32; color: #fff; }
 .toast-delete { background: #C62828; color: #fff; }
 
-/* ═══ EXPORT ═══ */
-.export-area {
-  width: 100%; min-height: 120px; padding: 10px; border-radius: 10px;
-  background: var(--input-bg); border: 1px solid rgba(255,255,255,.1);
-  color: #aab; font-size: 11px; font-family: monospace; resize: vertical;
-}
-.export-btns { display: flex; gap: 8px; margin-top: 8px; }
-.export-btn {
-  flex: 1; padding: 10px; border: none; border-radius: 10px;
-  font-size: 13px; font-weight: 700; cursor: pointer;
-  font-family: 'Noto Sans KR', sans-serif;
-}
 
 /* ═══ FABs ═══ */
 .fab-group {
