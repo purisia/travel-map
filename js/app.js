@@ -21,7 +21,7 @@ function save(d) {
   localStorage.setItem(SK, json);
   if (window.firebaseSync) {
     _lastSyncJSON = json;
-    firebaseSync.push(d);
+    firebaseSync.push(JSON.parse(json));
   }
 }
 function gid() { return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
