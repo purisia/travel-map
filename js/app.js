@@ -15,7 +15,15 @@ function load() {
   } catch (e) {}
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
-function save(d) { localStorage.setItem(SK, JSON.stringify(d)); }
+var _lastSyncJSON = '';
+function save(d) {
+  var json = JSON.stringify(d);
+  localStorage.setItem(SK, json);
+  if (window.firebaseSync) {
+    _lastSyncJSON = json;
+    firebaseSync.push(d);
+  }
+}
 function gid() { return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 let locs = load();
 
@@ -470,3 +478,34 @@ renderSubway();
 
 var fk = locs.filter(function (l) { return l.lat > 33.5; });
 if (fk.length) map.fitBounds(L.latLngBounds(fk.map(function (l) { return [l.lat, l.lng]; })), { padding: [50, 50], maxZoom: 14 });
+
+// ═══ FIREBASE REAL-TIME SYNC ═══
+if (window.firebaseSync) {
+  // Connection indicator
+  firebaseSync.onConnection(function (connected) {
+    var el = document.getElementById('syncStatus');
+    if (el) {
+      el.classList.toggle('connected', connected);
+      el.title = connected ? '클라우드 연동됨' : '오프라인';
+    }
+    if (connected) firebaseSync.push(locs);
+  });
+
+  // Initialize: push local data if Firebase is empty
+  firebaseSync.read().then(function (fbData) {
+    if (!fbData || fbData.length === 0) {
+      firebaseSync.push(locs);
+    }
+  });
+
+  // Listen for remote changes (from other devices)
+  firebaseSync.listen(function (data) {
+    var json = JSON.stringify(data);
+    if (json === _lastSyncJSON) return;
+    _lastSyncJSON = json;
+    locs = data;
+    localStorage.setItem(SK, JSON.stringify(data));
+    render();
+    if (document.getElementById('listView').classList.contains('open')) renderList();
+  });
+}

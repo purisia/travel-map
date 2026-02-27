@@ -15,12 +15,14 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="css/style.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
 <div class="header">
   <div><h1>🍜 후쿠오카 3/5~8</h1><div class="subtitle">맛집 + 관광 + 쇼핑</div></div>
-  <div class="header-btns"><button class="header-btn" onclick="openExportModal()" title="백업">💾</button></div>
+  <div class="header-btns"><span id="syncStatus" class="sync-indicator" title="오프라인">☁️</span><button class="header-btn" onclick="openExportModal()" title="백업">💾</button></div>
 </div>
 
 <div class="layer-control" id="layerControl">
@@ -109,6 +111,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/subway.js"></script>
+<script src="js/firebase-sync.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

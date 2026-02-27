@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fukuoka-map-v1';
+const CACHE_NAME = 'fukuoka-map-v2';
 
 const PRECACHE_URLS = [
   './',
@@ -6,6 +6,7 @@ const PRECACHE_URLS = [
   './css/style.css',
   './js/data.js',
   './js/subway.js',
+  './js/firebase-sync.js',
   './js/app.js',
   './manifest.json',
   './icons/icon-192.png',
