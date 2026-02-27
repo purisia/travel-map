@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="후쿠오카 여행 지도 - 맛집, 관광, 쇼핑, 온천 정보">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="후쿠오카맵">
+<title>🍜 후쿠오카 여행 지도 3/5-8</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>🍜 후쿠오카 3/5~8</h1><div class="subtitle">맛집 + 관광 + 쇼핑</div></div>
+  <div class="header-btns"><button class="header-btn" onclick="openExportModal()" title="백업">💾</button></div>
+</div>
+
+<div class="layer-control" id="layerControl">
+  <button class="layer-toggle" onclick="toggleLayerPanel()" id="layerBtn" title="필터">🗂️</button>
+  <div class="layer-panel" id="layerPanel">
+    <div class="layer-header">필터</div>
+    <button class="layer-item active" data-filter="all">✅ 전체</button>
+    <button class="layer-item layer-must" data-filter="must">⭐ 필수만</button>
+    <div class="layer-divider"></div>
+    <button class="layer-item active" data-filter="food"><span class="dot" style="background:#E53935"></span>맛집</button>
+    <button class="layer-item active" data-filter="cafe"><span class="dot" style="background:#6D4C41"></span>카페</button>
+    <button class="layer-item active" data-filter="sight"><span class="dot" style="background:#1565C0"></span>관광</button>
+    <button class="layer-item active" data-filter="shop"><span class="dot" style="background:#7B1FA2"></span>쇼핑</button>
+    <button class="layer-item active" data-filter="onsen"><span class="dot" style="background:#00897B"></span>온천</button>
+    <button class="layer-item active" data-filter="place"><span class="dot" style="background:#FF6F00"></span>숙소</button>
+  </div>
+</div>
+
+<div id="map"></div>
+<div class="count-badge">표시: <strong id="visible-count">0</strong>곳</div>
+<div class="pick-banner" id="pickBanner">📍 지도를 터치해서 위치를 선택하세요</div>
+
+<div class="fab-group">
+  <button class="fab fab-subway" onclick="toggleSubway()" id="subwayBtn" title="지하철">🚇</button>
+  <button class="fab fab-list" onclick="openList()" title="리스트">📋</button>
+  <button class="fab fab-gps" onclick="trackGPS()" id="gpsBtn" title="내 위치">📍</button>
+  <button class="fab fab-add" onclick="openAddModal()" title="추가">＋</button>
+</div>
+
+<!-- LIST VIEW -->
+<div class="list-overlay" id="listView">
+  <div class="list-header">
+    <h2>📋 장소 리스트</h2>
+    <button class="list-close" onclick="closeList()">✕</button>
+  </div>
+  <div class="list-search"><input id="listSearch" placeholder="🔍 이름, 지역, 메모 검색..." oninput="renderList()"></div>
+  <div class="list-filters" id="listFilters">
+    <button class="sort-btn active" data-sort="cat" onclick="setSort('cat')">카테고리순</button>
+    <button class="sort-btn" data-sort="dist" onclick="setSort('dist')">거리순 📍</button>
+    <button class="sort-btn" data-sort="name" onclick="setSort('name')">이름순</button>
+  </div>
+  <div class="list-body" id="listBody"></div>
+</div>
+
+<!-- FORM MODAL -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modalTitle">📌 장소 추가</div><button class="modal-close" onclick="closeFormModal()">✕</button></div>
+    <form id="locForm" onsubmit="submitForm(event)">
+      <input type="hidden" id="editId" value="">
+      <div class="form-group"><label class="form-label">이름 (한국어)</label><input class="form-input" id="fName" required placeholder="예: 이치란 라멘"></div>
+      <div class="form-group"><label class="form-label">이름 (일본어)</label><input class="form-input" id="fNameJp" placeholder="예: 一蘭 天神店"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">카테고리</label><select class="form-select" id="fCat"><option value="food" selected>🍴 맛집</option><option value="cafe">☕ 카페</option><option value="sight">📍 관광</option><option value="shop">🛍️ 쇼핑</option><option value="onsen">♨️ 온천</option><option value="place">🏨 숙소</option></select></div>
+        <div class="form-group"><label class="form-label">타베로그</label><input class="form-input" id="fRating" placeholder="3.60"></div>
+      </div>
+      <div class="form-group"><label class="must-toggle"><input type="checkbox" id="fMust"><span class="must-toggle-label">필수 장소로 표시 (강조)</span></label></div>
+      <div class="form-group"><label class="form-label">지역</label><input class="form-input" id="fArea" placeholder="예: 하카타역 도보 5분"></div>
+      <div class="form-group"><label class="form-label">메모</label><textarea class="form-textarea" id="fNote" placeholder="영업시간, 추천 메뉴, 주의사항 등"></textarea></div>
+      <div class="form-group"><label class="form-label">📍 Google Maps 링크 (붙여넣으면 위치 자동입력!)</label><input class="form-input" id="fMaps" placeholder="https://www.google.com/maps/... 링크 붙여넣기" oninput="extractCoords()"></div>
+      <div id="coordResult" style="display:none;padding:6px 10px;border-radius:8px;background:rgba(46,125,50,.15);color:#66BB6A;font-size:12px;font-weight:600;margin-bottom:8px">✅ 위치 자동 입력됨!</div>
+      <div class="form-hint" style="margin-bottom:8px">💡 링크 없으면 아래에서 직접 지도 터치 or 위도/경도 입력</div>
+      <button type="button" class="submit-btn" style="background:rgba(255,255,255,.08);color:#aab;margin-bottom:8px" onclick="startPick()">📍 지도에서 위치 선택</button>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">위도 (자동입력)</label><input class="form-input" id="fLat" placeholder="자동입력됨"></div>
+        <div class="form-group"><label class="form-label">경도 (자동입력)</label><input class="form-input" id="fLng" placeholder="자동입력됨"></div>
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">✅ 등록하기</button>
+    </form>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">💾 데이터 관리</div><button class="modal-close" onclick="closeExportModal()">✕</button></div>
+    <div class="form-group"><label class="form-label">현재 데이터 (JSON) — 복사해서 백업</label><textarea class="export-area" id="exportArea" readonly></textarea></div>
+    <div class="export-btns">
+      <button class="export-btn" style="background:var(--accent);color:#fff" onclick="copyExport()">📋 복사</button>
+      <button class="export-btn" style="background:rgba(255,255,255,.1);color:#aab" onclick="promptImport()">📥 가져오기</button>
+      <button class="export-btn" style="background:rgba(229,57,53,.15);color:#E53935" onclick="resetData()">🗑️ 초기화</button>
+    </div>
+    <div class="form-hint" style="margin-top:10px">📥 가져오기: 백업 JSON 붙여넣기 | 🗑️ 초기화: 원본 복원</div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/subway.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
