@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fukuoka-map-v6';
+const CACHE_NAME = 'fukuoka-map-v7';
 
 const PRECACHE_URLS = [
   './',

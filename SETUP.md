@@ -9,6 +9,7 @@
 | DB | [Firebase Realtime Database](https://firebase.google.com/) | 실시간 데이터 동기화 |
 | 호스팅 | [GitHub Pages](https://pages.github.com/) | 정적 사이트 배포 |
 | PWA | Service Worker + manifest.json | 오프라인 지원, 홈 화면 추가 |
+| 좌표변환 | [Google Apps Script](https://script.google.com/) | 단축 URL → 좌표/이름/지역 자동 추출 |
 | 폰트 | Noto Sans KR (Google Fonts) | 한국어 UI |
 
 ## 프로젝트 구조
@@ -32,7 +33,7 @@ travel-map/
 
 - 장소 마커 표시 (카테고리별 색상, 필수 장소 강조 애니메이션)
 - 카테고리 필터 (맛집/카페/관광/쇼핑/온천/숙소)
-- 장소 추가/수정/삭제 (Google Maps 링크에서 좌표 자동 추출)
+- 장소 추가/수정/삭제 (Google Maps 링크에서 좌표 자동 추출, 단축 URL도 지원)
 - 리스트 뷰 (카테고리순/거리순/이름순 정렬, 검색)
 - GPS 실시간 추적
 - 지하철 노선도 (공항선/하코자키선/나나쿠마선, OSM 실제 경로)
@@ -105,6 +106,57 @@ Firebase Console → Realtime Database → **Rules** 탭:
 
 > Firebase 웹 API 키는 클라이언트 식별용이며 비밀이 아닙니다.
 > 보안은 Database Rules에서 제어합니다.
+
+### 6. Google Apps Script 배포 (단축 URL 좌표 변환)
+
+Google Maps 단축 URL(`maps.app.goo.gl/...`)에서 좌표, 이름, 지역을 자동 추출하는 서버리스 함수입니다.
+
+1. [Google Apps Script](https://script.google.com/) → **새 프로젝트**
+2. 아래 코드 붙여넣기:
+
+```javascript
+function doGet(e) {
+  var result = { lat: null, lng: null, name: null, address: null, error: null };
+  try {
+    var shortUrl = e.parameter.url;
+    if (!shortUrl) { result.error = 'Missing url'; return jsonResponse(result); }
+    var response = UrlFetchApp.fetch(shortUrl, {
+      followRedirects: false, muteHttpExceptions: true
+    });
+    var redirectUrl = response.getHeaders()['Location'] || '';
+    var m = redirectUrl.match(/\/place\/([^\/]+)\//);
+    if (!m) { result.error = 'No address found'; return jsonResponse(result); }
+    var fullText = decodeURIComponent(m[1].replace(/\+/g, ' '));
+    var parts = fullText.match(/^(.+?)\s+(\d.+)$/);
+    if (parts) {
+      result.name = parts[1].trim();
+      result.address = parts[2]
+        .replace(/,?\s*\d{3}-?\d{4}\s*/g, '')
+        .replace(/,?\s*(일본|Japan|日本)\s*$/i, '')
+        .trim();
+    } else { result.name = fullText; }
+    var geo = Maps.newGeocoder().geocode(fullText);
+    if (geo.results && geo.results.length > 0) {
+      var loc = geo.results[0].geometry.location;
+      result.lat = loc.lat; result.lng = loc.lng;
+    }
+  } catch (err) { result.error = err.toString(); }
+  return jsonResponse(result);
+}
+function jsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+```
+
+3. **배포** → **새 배포** → 유형: **웹 앱** → 액세스: **모든 사용자** → 배포
+4. 복사한 URL을 `js/app.js` 상단의 `GEOCODE_API` 변수에 설정:
+
+```javascript
+var GEOCODE_API = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+```
+
+> 코드 수정 시 반드시 **새 배포**를 해야 변경사항이 반영됩니다 (기존 배포 수정 불가).
 
 ---
 

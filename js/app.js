@@ -1,3 +1,6 @@
+// ═══ CONFIG ═══
+var GEOCODE_API = 'https://script.google.com/macros/s/AKfycbykh0Wpq8rJ3qsttux_5sGkYXRdgau8jDTgq4xJ_mnDXpfIXofPjBbfMtb2ZBm7BBEF/exec';
+
 // ═══ STORAGE ═══
 const SK = 'fukuoka_trip_2025';
 function load() {
@@ -341,9 +344,44 @@ function extractCoords() {
     cr.style.color = '#66BB6A';
   } else if (url.match(/maps\.app\.goo\.gl|goo\.gl\/maps/)) {
     cr.style.display = 'block';
-    cr.innerHTML = '📎 단축 URL! <a href="' + url + '" target="_blank" style="color:#4285f4;text-decoration:underline;" onclick="event.stopPropagation()">구글맵에서 열기</a> → 전체 URL 복사 → 여기에 붙여넣기';
+    if (!GEOCODE_API) {
+      cr.innerHTML = '📎 단축 URL! 크롬 주소창에 붙여넣기 → 긴 URL 복사 → 다시 붙여넣기';
+      cr.style.background = 'rgba(66,133,244,.15)';
+      cr.style.color = '#90CAF9';
+      return;
+    }
+    cr.innerHTML = '🔄 단축 URL 정보 추출 중...';
     cr.style.background = 'rgba(66,133,244,.15)';
     cr.style.color = '#90CAF9';
+    fetch(GEOCODE_API + '?url=' + encodeURIComponent(url))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.lat && data.lng) {
+          document.getElementById('fLat').value = data.lat.toFixed(6);
+          document.getElementById('fLng').value = data.lng.toFixed(6);
+          if (data.name && !document.getElementById('fName').value) {
+            document.getElementById('fName').value = data.name;
+          }
+          if (data.address && !document.getElementById('fArea').value) {
+            document.getElementById('fArea').value = data.address;
+          }
+          var filled = ['좌표'];
+          if (data.name) filled.push('이름');
+          if (data.address) filled.push('지역');
+          cr.innerHTML = '✅ 자동 입력 완료! (' + filled.join(', ') + ')';
+          cr.style.background = 'rgba(46,125,50,.15)';
+          cr.style.color = '#66BB6A';
+        } else {
+          cr.innerHTML = '❌ 추출 실패. 전체 URL을 붙여넣어주세요.';
+          cr.style.background = 'rgba(229,57,53,.15)';
+          cr.style.color = '#EF9A9A';
+        }
+      })
+      .catch(function () {
+        cr.innerHTML = '❌ 네트워크 오류. 전체 URL을 붙여넣어주세요.';
+        cr.style.background = 'rgba(229,57,53,.15)';
+        cr.style.color = '#EF9A9A';
+      });
   } else {
     cr.style.display = 'none';
   }
