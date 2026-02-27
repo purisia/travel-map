@@ -1,5 +1,6 @@
 // ═══ CONFIG ═══
 var GEOCODE_API = 'https://script.google.com/macros/s/AKfycbykh0Wpq8rJ3qsttux_5sGkYXRdgau8jDTgq4xJ_mnDXpfIXofPjBbfMtb2ZBm7BBEF/exec';
+var PLACES_API_KEY = 'AIzaSyBKGleE6L3U2wVhN6w7sqK-ko4o-W-E6Ek';
 
 // ═══ STORAGE ═══
 const SK = 'fukuoka_trip_2025';
@@ -260,6 +261,7 @@ function openAddModal() {
   document.getElementById('locForm').reset();
   document.getElementById('fMust').checked = false;
   document.getElementById('coordResult').style.display = 'none';
+  document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('formModal').classList.add('open');
 }
 
@@ -281,6 +283,7 @@ function openEdit(id) {
   document.getElementById('fLng').value = loc.lng || '';
   document.getElementById('fMaps').value = loc.maps || '';
   document.getElementById('coordResult').style.display = 'none';
+  document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('formModal').classList.add('open');
 }
 
@@ -324,6 +327,100 @@ function submitForm(e) {
   toast(id ? '수정 완료!' : '등록 완료!', 'success');
 }
 
+// ═══ PLACES API TYPE → CATEGORY MAPPING ═══
+var PLACES_TYPE_MAP = {
+  coffee_shop: 'cafe', cafe: 'cafe', tea_house: 'cafe',
+  restaurant: 'food', ramen_restaurant: 'food', sushi_restaurant: 'food',
+  japanese_restaurant: 'food', korean_restaurant: 'food', chinese_restaurant: 'food',
+  seafood_restaurant: 'food', steak_house: 'food', meal_delivery: 'food',
+  meal_takeaway: 'food', bakery: 'food', bar: 'food', fast_food_restaurant: 'food',
+  ice_cream_shop: 'food', pizza_restaurant: 'food', sandwich_shop: 'food',
+  tourist_attraction: 'sight', museum: 'sight', park: 'sight',
+  hindu_temple: 'sight', church: 'sight', amusement_park: 'sight',
+  aquarium: 'sight', art_gallery: 'sight', zoo: 'sight',
+  shopping_mall: 'shop', clothing_store: 'shop', book_store: 'shop',
+  convenience_store: 'shop', supermarket: 'shop', department_store: 'shop',
+  gift_shop: 'shop', shoe_store: 'shop', store: 'shop',
+  drugstore: 'shop', electronics_store: 'shop', market: 'shop',
+  spa: 'onsen',
+  lodging: 'place', hotel: 'place', hostel: 'place',
+  guest_house: 'place', resort_hotel: 'place'
+};
+
+function placesEnrich(lat, lng, cr) {
+  if (!PLACES_API_KEY) return;
+  var filled = cr._filledItems || ['좌표'];
+  cr.innerHTML = '🔄 장소 상세 정보 조회 중...';
+
+  fetch('https://places.googleapis.com/v1/places:searchNearby', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': PLACES_API_KEY,
+      'X-Goog-FieldMask': 'places.displayName,places.primaryType,places.types,places.photos,places.formattedAddress'
+    },
+    body: JSON.stringify({
+      locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius: 30.0 } },
+      languageCode: 'ja',
+      maxResultCount: 3
+    })
+  })
+  .then(function (r) { return r.json(); })
+  .then(function (res) {
+    if (!res.places || res.places.length === 0) {
+      cr.innerHTML = '✅ 자동 입력 완료! (' + filled.join(', ') + ')';
+      cr.style.background = 'rgba(46,125,50,.15)';
+      cr.style.color = '#66BB6A';
+      return;
+    }
+    var place = res.places[0];
+
+    // Japanese name
+    if (place.displayName && place.displayName.text && !document.getElementById('fNameJp').value) {
+      document.getElementById('fNameJp').value = place.displayName.text;
+      filled.push('일본어명');
+    }
+
+    // Category mapping
+    var mappedCat = null;
+    if (place.primaryType && PLACES_TYPE_MAP[place.primaryType]) {
+      mappedCat = PLACES_TYPE_MAP[place.primaryType];
+    }
+    if (!mappedCat && place.types) {
+      for (var i = 0; i < place.types.length; i++) {
+        if (PLACES_TYPE_MAP[place.types[i]]) {
+          mappedCat = PLACES_TYPE_MAP[place.types[i]];
+          break;
+        }
+      }
+    }
+    if (mappedCat) {
+      document.getElementById('fCat').value = mappedCat;
+      filled.push('카테고리');
+    }
+
+    // Photo preview
+    var photoPreview = document.getElementById('photoPreview');
+    var photoImg = document.getElementById('photoImg');
+    if (place.photos && place.photos.length > 0) {
+      var photoName = place.photos[0].name;
+      photoImg.src = 'https://places.googleapis.com/v1/' + photoName + '/media?maxHeightPx=400&key=' + PLACES_API_KEY;
+      photoPreview.style.display = 'block';
+      filled.push('사진');
+    }
+
+    cr.innerHTML = '✅ 자동 입력 완료! (' + filled.join(', ') + ')';
+    cr.style.background = 'rgba(46,125,50,.15)';
+    cr.style.color = '#66BB6A';
+  })
+  .catch(function () {
+    // Places API 실패해도 기본 정보는 이미 입력됨
+    cr.innerHTML = '✅ 자동 입력 완료! (' + filled.join(', ') + ')';
+    cr.style.background = 'rgba(46,125,50,.15)';
+    cr.style.color = '#66BB6A';
+  });
+}
+
 function extractCoords() {
   var url = document.getElementById('fMaps').value;
   if (!url) return;
@@ -335,13 +432,18 @@ function extractCoords() {
   if (!lat) { var m3 = url.match(/place\/[^/]+\/(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m3) { lat = parseFloat(m3[1]); lng = parseFloat(m3[2]); } }
   if (!lat) { var m4 = url.match(/q=(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m4) { lat = parseFloat(m4[1]); lng = parseFloat(m4[2]); } }
   if (!lat) { var m5 = url.match(/query=(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m5) { lat = parseFloat(m5[1]); lng = parseFloat(m5[2]); } }
+  // 사진 미리보기 초기화
+  document.getElementById('photoPreview').style.display = 'none';
+
   if (lat && lng && lat > 30 && lat < 40 && lng > 125 && lng < 140) {
     document.getElementById('fLat').value = lat.toFixed(6);
     document.getElementById('fLng').value = lng.toFixed(6);
     cr.style.display = 'block';
-    cr.innerHTML = '✅ 위치 자동 입력! (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
-    cr.style.background = 'rgba(46,125,50,.15)';
-    cr.style.color = '#66BB6A';
+    cr._filledItems = ['좌표'];
+    cr.innerHTML = '🔄 장소 상세 정보 조회 중...';
+    cr.style.background = 'rgba(66,133,244,.15)';
+    cr.style.color = '#90CAF9';
+    placesEnrich(lat, lng, cr);
   } else if (url.match(/maps\.app\.goo\.gl|goo\.gl\/maps/)) {
     cr.style.display = 'block';
     if (!GEOCODE_API) {
@@ -368,9 +470,9 @@ function extractCoords() {
           var filled = ['좌표'];
           if (data.name) filled.push('이름');
           if (data.address) filled.push('지역');
-          cr.innerHTML = '✅ 자동 입력 완료! (' + filled.join(', ') + ')';
-          cr.style.background = 'rgba(46,125,50,.15)';
-          cr.style.color = '#66BB6A';
+          cr._filledItems = filled;
+          // Places API로 일본어명, 카테고리, 사진 추가 조회
+          placesEnrich(data.lat, data.lng, cr);
         } else {
           cr.innerHTML = '❌ 추출 실패. 전체 URL을 붙여넣어주세요.';
           cr.style.background = 'rgba(229,57,53,.15)';

@@ -84,6 +84,7 @@
       <div class="form-group"><label class="form-label">메모</label><textarea class="form-textarea" id="fNote" placeholder="영업시간, 추천 메뉴, 주의사항 등"></textarea></div>
       <div class="form-group"><label class="form-label">📍 Google Maps 링크 (붙여넣으면 위치 자동입력!)</label><input class="form-input" id="fMaps" placeholder="https://www.google.com/maps/... 링크 붙여넣기" oninput="extractCoords()"></div>
       <div id="coordResult" style="display:none;padding:6px 10px;border-radius:8px;background:rgba(46,125,50,.15);color:#66BB6A;font-size:12px;font-weight:600;margin-bottom:8px">✅ 위치 자동 입력됨!</div>
+      <div id="photoPreview" style="display:none;margin-bottom:8px;border-radius:8px;overflow:hidden;max-height:200px"><img id="photoImg" style="width:100%;height:auto;display:block;border-radius:8px" alt="장소 사진"></div>
       <div class="form-hint" style="margin-bottom:8px">💡 링크 없으면 아래에서 직접 지도 터치 or 위도/경도 입력</div>
       <button type="button" class="submit-btn" style="background:rgba(255,255,255,.08);color:#aab;margin-bottom:8px" onclick="startPick()">📍 지도에서 위치 선택</button>
       <div class="form-row">
