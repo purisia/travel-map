@@ -619,12 +619,22 @@ if (window.firebaseSync) {
     }
   });
 
-  // Initialize: Firebase is source of truth
+  // Initialize: Firebase is source of truth, but merge new DEFAULT_DATA entries
   firebaseSync.read().then(function (fbData) {
     if (fbData && fbData.length > 0) {
+      // Merge any new DEFAULT_DATA entries not yet in Firebase
+      var ids = new Set(fbData.map(function (l) { return l.id; }));
+      var added = 0;
+      DEFAULT_DATA.forEach(function (d) {
+        if (!ids.has(d.id)) {
+          fbData.push(JSON.parse(JSON.stringify(d)));
+          added++;
+        }
+      });
       locs = fbData;
       localStorage.setItem(SK, JSON.stringify(locs));
       render();
+      if (added > 0) firebaseSync.push(locs);
     } else {
       // Firebase empty (first time) - push local data
       firebaseSync.push(locs);
