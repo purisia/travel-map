@@ -494,6 +494,7 @@ function delLoc(id) {
   if (!loc || !confirm('"' + loc.name + '" 삭제?')) return;
   locs = locs.filter(function (l) { return l.id !== id; });
   save(locs);
+  if (window.firebaseSync) firebaseSync.markDeleted(id);
   map.closePopup();
   render();
   renderList();
@@ -619,14 +620,29 @@ if (window.firebaseSync) {
     }
   });
 
-  // Initialize: Firebase is source of truth
-  firebaseSync.read().then(function (fbData) {
+  // Initialize: Firebase is source of truth, but merge new DEFAULT_DATA entries
+  Promise.all([firebaseSync.read(), firebaseSync.readDeletedIds()]).then(function (results) {
+    var fbData = results[0];
+    var deletedIds = results[1];
     if (fbData && fbData.length > 0) {
+      // Merge DEFAULT_DATA entries not in Firebase AND not previously deleted
+      var ids = new Set(fbData.map(function (l) { return l.id; }));
+      var added = 0;
+      DEFAULT_DATA.forEach(function (d) {
+        if (!ids.has(d.id) && !deletedIds.has(d.id)) {
+          fbData.push(JSON.parse(JSON.stringify(d)));
+          added++;
+        }
+      });
       locs = fbData;
       localStorage.setItem(SK, JSON.stringify(locs));
       render();
+      if (added > 0) firebaseSync.push(locs);
     } else {
-      // Firebase empty (first time) - push local data
+      // Firebase empty (first time) - push local data, excluding previously deleted
+      if (deletedIds.size > 0) {
+        locs = locs.filter(function (l) { return !deletedIds.has(l.id); });
+      }
       firebaseSync.push(locs);
     }
   });
