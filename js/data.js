@@ -92,6 +92,10 @@ const DEFAULT_DATA = [
   // ──────────────────────────────────
   { id: "d51", name: "마메다마치 히나마쓰리", jp: "豆田町商店街", cat: "onsen", area: "히타", note: "에도보존지구. 3/6~8 히나인형!", lat: 33.3273, lng: 130.9366, maps: "https://www.google.com/maps/search/?api=1&query=豆田町商店街+日田" },
   { id: "d52", name: "코토히라 온천", jp: "かやうさぎ", cat: "onsen", area: "히타", note: "130년 료칸. 당일입욕. 노천탕", lat: 33.2987, lng: 130.9370, maps: "https://www.google.com/maps/search/?api=1&query=琴ひら温泉+かやうさぎ+日田" },
+  { id: "d54", name: "쿤초 양조장", jp: "薫長酒造", cat: "sight", area: "히타 마메다마치", note: "1702년 창업 사케 양조장. 무료견학·시음. 양조자료관. 마메다마치 내", lat: 33.3270, lng: 130.9358, maps: "https://www.google.com/maps/search/?api=1&query=薫長酒造+日田" },
+  { id: "d55", name: "삿포로 맥주 히타공장", jp: "サッポロビール九州日田工場", cat: "sight", area: "히타", note: "무료 공장견학(예약필수). 시음 가능. 히타의 명수로 양조", lat: 33.3400, lng: 130.9460, maps: "https://www.google.com/maps/search/?api=1&query=サッポロビール+九州日田工場" },
+  { id: "d56", name: "오야마댐 진격의 거인 동상", jp: "大山ダム 進撃の巨人銅像", cat: "sight", area: "히타 오야마", note: "이사야마 하지메 출신지. 엘런·미카사·아르민 실물크기 동상. 무료", lat: 33.2319, lng: 130.9748, maps: "https://www.google.com/maps/search/?api=1&query=大山ダム+進撃の巨人+日田" },
+  { id: "d57", name: "히타 온천", jp: "日田温泉", cat: "onsen", area: "히타 미쿠마강변", note: "미쿠마강(三隈川) 따라 온천료칸 밀집. 당일입욕 가능", lat: 33.3213, lng: 130.9413, maps: "https://www.google.com/maps/search/?api=1&query=日田温泉+三隈川" },
 
   // ──────────────────────────────────
   // 🏨 숙소 (place)
