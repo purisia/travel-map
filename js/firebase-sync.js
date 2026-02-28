@@ -13,6 +13,7 @@
   firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
   var placesRef = db.ref('places');
+  var deletedRef = db.ref('deletedIds');
 
   window.firebaseSync = {
     // Push entire dataset to Firebase (keyed by place id)
@@ -23,6 +24,19 @@
         console.log('[Firebase] synced', data.length, 'places');
       }).catch(function (err) {
         console.warn('[Firebase] sync failed:', err);
+      });
+    },
+
+    // Record a deleted ID so DEFAULT_DATA won't re-add it
+    markDeleted: function (id) {
+      return deletedRef.child(id).set(true);
+    },
+
+    // Read deleted IDs set
+    readDeletedIds: function () {
+      return deletedRef.once('value').then(function (snapshot) {
+        var data = snapshot.val();
+        return data ? new Set(Object.keys(data)) : new Set();
       });
     },
 
